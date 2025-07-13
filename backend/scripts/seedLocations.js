@@ -35,7 +35,7 @@ async function seed() {
         //   cleaned: false,
         // },
         {
-            name: "School Playground",
+            name: "Hospital Garden",
             lat: 29.5239,
             lng: 79.0890,
             beforePhotoUrl: "https://via.placeholder.com/300x200?text=Before+Cleanup",

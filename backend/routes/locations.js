@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { db } = require("../firebase/config");
 const { isNearby, calculateDistance } = require("../utils/isNearby");
+const sendClaimNotification = require("../utils/sendEmail");
 
 // GET /locations → returns all locations
 router.get("/locations", async (req, res) => {
@@ -81,21 +82,31 @@ router.post("/claim-location", async (req, res) => {
       }
     }
 
-    // Proximity check with distance
+    // Distance check
     const distance = calculateDistance(userLat, userLng, location.lat, location.lng);
-
     if (distance > 1000) {
       return res.status(403).json({
         status: "too far",
-        distance: parseFloat(distance.toFixed(2)), // meters
+        distance: parseFloat(distance.toFixed(2)),
       });
     }
 
-    // ✅ Claim it
+    // ✅ Claim location
     await locationRef.update({
       claimedBy: walletAddress,
       claimedAt: new Date().toISOString(),
     });
+
+    // Fetch user info from Firestore
+    const userSnap = await db.collection("users").doc(walletAddress).get();
+    const userData = userSnap.exists ? userSnap.data() : {};
+    const userEmail = userData.email || null;
+    const userName = userData.name || userData.username || null;
+
+    // Send email if email is available
+    if (userEmail) {
+      await sendClaimNotification(userEmail, userName, location.name);
+    }
 
     return res.status(200).json({ status: "claimed" });
 
@@ -105,7 +116,7 @@ router.post("/claim-location", async (req, res) => {
   }
 });
 
-// GET /locations/:id → Get single location detail
+// GET /locations/:id
 router.get("/locations/:id", async (req, res) => {
   const { id } = req.params;
 
@@ -154,7 +165,7 @@ router.get("/test-distance", (req, res) => {
   const lng2Num = parseFloat(lng2);
 
   const toRad = (value) => (value * Math.PI) / 180;
-  const R = 6371000; // meters
+  const R = 6371000;
 
   const dLat = toRad(lat2Num - lat1Num);
   const dLng = toRad(lng2Num - lng1Num);
@@ -168,13 +179,11 @@ router.get("/test-distance", (req, res) => {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const distance = R * c;
 
-  const withinThreshold = distance <= 1000;
-
   res.status(200).json({
     point1: { lat: lat1Num, lng: lng1Num },
     point2: { lat: lat2Num, lng: lng2Num },
     distanceInMeters: Math.round(distance),
-    isNearby: withinThreshold,
+    isNearby: distance <= 1000,
   });
 });
 
