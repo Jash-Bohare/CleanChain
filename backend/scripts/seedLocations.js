@@ -35,9 +35,9 @@ async function seed() {
         //   cleaned: false,
         // },
         {
-            name: "Pandit Deendayal Energy University",
-            lat: 29.5239,
-            lng: 79.0890,
+            name: "Beti Bachao Garden",
+            lat: 23.051815,
+            lng: 72.666919,
             beforePhotoUrl: "https://via.placeholder.com/300x200?text=Before+Cleanup",
             afterPhotoUrl: null,
             rewardTokens: 100,
