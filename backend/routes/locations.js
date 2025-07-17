@@ -84,7 +84,7 @@ router.post("/claim-location", async (req, res) => {
 
     // Distance check
     const distance = calculateDistance(userLat, userLng, location.lat, location.lng);
-    if (distance > 1000) {
+    if (distance > 10000) {
       return res.status(403).json({
         status: "too far",
         distance: parseFloat(distance.toFixed(2)),
@@ -183,7 +183,7 @@ router.get("/test-distance", (req, res) => {
     point1: { lat: lat1Num, lng: lng1Num },
     point2: { lat: lat2Num, lng: lng2Num },
     distanceInMeters: Math.round(distance),
-    isNearby: distance <= 1000,
+    isNearby: distance <= 10000,
   });
 });
 
