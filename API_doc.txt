@@ -222,3 +222,75 @@ lat1 = 29.5239
 lng1 = 79.089
 lat2 = 29.5147
 lng2 = 79.089
+
+
+
+7) Retrieve User Locations
+
+Method: GET
+
+URL: http://localhost:5000/api/user/{userId}/locations
+
+Description: This endpoint is used to retrieve the locations associated with a specific user identified by the userId.
+
+Request Parameters:
+userId (path parameter): A unique identifier for the user whose locations are being requested. In this example, it is represented as 0xabc.
+
+Response:
+On a successful request (HTTP Status 200), the response will be in JSON format and will include the following structure and these details:
+locations: An array of location objects associated with the user. Each location object contains:
+id: A unique identifier for the location.
+name: The name of the location.
+lat: The latitude coordinate of the location.
+rewardTokens: The number of reward tokens associated with the location.
+claimedAt: The timestamp when the location was claimed.
+claimedBy: The identifier of the user who claimed the location.
+lng: The longitude coordinate of the location.
+cleanedBy: The identifier of the user who cleaned the location.
+cleaned: A boolean indicating if the location has been cleaned.
+beforePhotoUrl: A URL to a photo taken before any cleaning.
+afterPhotoUrl: A URL to a photo taken after cleaning.
+Expected Response Body:
+{
+  "locations": [
+    {
+      "id": "string",
+      "name": "string",
+      "lat": "number",
+      "rewardTokens": "number",
+      "claimedAt": "string",
+      "claimedBy": "string",
+      "lng": "number",
+      "cleanedBy": "string",
+      "cleaned": "boolean",
+      "beforePhotoUrl": "string",
+      "afterPhotoUrl": "string"
+    }
+  ]
+}
+
+
+
+8) Upload Image
+
+Method: POST
+
+URL: http://localhost:5000/api/upload/{locationId}
+
+Description: This endpoint allows users to upload an image file associated with a specific identifier. The image is uploaded as part of a form-data request.
+
+Request Body (JSON): 
+The request must include the following form-data parameter:
+afterImage (type:file): This parameter is used to upload the image file. It should be provided as a file upload in the form-data.
+
+Example Request Body:
+{
+    "message": "Image uploaded and Firestore updated.",
+    "afterPhotoUrl": "http://localhost:5000/uploads/1752914692584-Screenshot 2025-07-18 185404.png"
+}
+
+Response:
+Upon successful upload, the server will respond with confirmation message indicating the status of the upload. The response structure typically includes:
+Status (200): Indicates whether the upload was successful or if there was an error.
+Message: A descriptive message related to the upload process.
+Data: Additional information about the uploaded file, if applicable.
