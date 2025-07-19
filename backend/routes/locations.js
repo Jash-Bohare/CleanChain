@@ -91,7 +91,7 @@ router.post("/claim-location", async (req, res) => {
       });
     }
 
-    // ✅ Claim location
+    // Claim location
     await locationRef.update({
       claimedBy: walletAddress,
       claimedAt: new Date().toISOString(),

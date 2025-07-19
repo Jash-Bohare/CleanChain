@@ -74,12 +74,12 @@ async function seed() {
 
     for (const loc of locations) {
         const docRef = await db.collection("locations").add(loc);
-        console.log(`✅ Added: ${loc.name} (id: ${docRef.id})`);
+        console.log(`Added: ${loc.name} (id: ${docRef.id})`);
     }
 
-    console.log("🎉 Seeding complete.");
+    console.log("Seeding complete.");
 }
 
 seed().catch((err) => {
-    console.error("🔥 Seeding failed:", err);
+    console.error("Seeding failed:", err);
 });
