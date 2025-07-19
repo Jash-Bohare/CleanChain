@@ -5,10 +5,10 @@ const path = require('path');
 
 const router = express.Router();
 
-// ✅ Serve uploads folder statically for public access
+// Serve uploads folder statically for public access
 router.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// ✅ Configure Multer for storing files in 'uploads/' folder
+// Configure Multer for storing files in 'uploads/' folder
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, path.join(__dirname, '../uploads'));
@@ -20,7 +20,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// ✅ POST route to handle after-cleaning image upload
+// POST route to handle after-cleaning image upload
 router.post('/:locationId', upload.single('afterImage'), async (req, res) => {
   const { locationId } = req.params;
 
