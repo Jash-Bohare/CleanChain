@@ -1,5 +1,3 @@
-// src/api/index.js
-
 export const walletLogin = async (walletAddress) => {
   const res = await fetch("http://localhost:5000/auth/wallet-login", {
     method: "POST",
@@ -43,22 +41,5 @@ export const testDistance = async ({ lat1, lng1, lat2, lng2 }) => {
   const params = new URLSearchParams({ lat1, lng1, lat2, lng2 });
   const res = await fetch(`http://localhost:5000/api/test-distance?${params.toString()}`);
   if (!res.ok) throw new Error("Failed to test distance");
-  return await res.json();
-};
-
-// 🔹 Phase 2A functions
-
-export const getDashboardData = async (userId) => {
-  const res = await fetch(`http://localhost:5000/api/user-locations/${userId}`);
-  if (!res.ok) throw new Error("Failed to fetch dashboard data");
-  return await res.json();
-};
-
-export const uploadProofImage = async (formData) => {
-  const res = await fetch(`http://localhost:5000/api/upload-proof`, {
-    method: "POST",
-    body: formData,
-  });
-  if (!res.ok) throw new Error("Failed to upload proof image");
   return await res.json();
 };
