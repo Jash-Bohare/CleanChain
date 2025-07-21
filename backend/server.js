@@ -28,6 +28,10 @@ app.use("/api/user", userRoutes);
 const uploadRoutes = require("./routes/upload");
 app.use("/api/upload", uploadRoutes);
 
+// Vote Route (submit vote for verified cleanup)
+const voteRoutes = require("./routes/vote");
+app.use("/api/vote", voteRoutes);
+
 // Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
