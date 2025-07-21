@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@nomicfoundation/hardhat-verify": "^2.1.0"
+  }
+}
