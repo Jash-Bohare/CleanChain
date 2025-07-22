@@ -22,11 +22,12 @@ const rewardCleanup = async (locationId) => {
       throw new Error(`Location ${locationId} has no claimedBy field`);
     }
 
-    const userRef = db.collection("users").doc(userId);
+    const normalizedUserId = userId.toLowerCase(); // 🔥 Normalize address
+    const userRef = db.collection("users").doc(normalizedUserId);
     const userDoc = await userRef.get();
 
     if (!userDoc.exists) {
-      throw new Error(`User with ID ${userId} not found in users collection`);
+      throw new Error(`User with ID ${normalizedUserId} not found in users collection`);
     }
 
     const user = userDoc.data();
@@ -37,7 +38,7 @@ const rewardCleanup = async (locationId) => {
     }
 
     if (!user.walletAddress) {
-      throw new Error(`User ${userId} has no walletAddress in their profile`);
+      throw new Error(`User ${normalizedUserId} has no walletAddress in their profile`);
     }
 
     console.log(`[🔁 Rewarding] Sending ${REWARD_AMOUNT} ECO to ${user.walletAddress}`);
@@ -53,7 +54,7 @@ const rewardCleanup = async (locationId) => {
     await locationRef.update({
       status: "cleaned",
       rewarded: true,
-      cleanedBy: userId,
+      cleanedBy: normalizedUserId,
     });
 
     // Optional: update user's token balance in DB (if you're tracking it off-chain)
@@ -70,7 +71,7 @@ const rewardCleanup = async (locationId) => {
         `Congrats! You’ve earned ${REWARD_AMOUNT} ECO tokens for cleaning "${location.name}". Keep it green! 🌱`
       );
     } else {
-      console.warn(`[📧 Skipped Email] No email found for user ${userId}`);
+      console.warn(`[📧 Skipped Email] No email found for user ${normalizedUserId}`);
     }
 
     console.log(`[✅ Reward Sent] ${REWARD_AMOUNT} ECO → ${user.walletAddress} for location ${locationId}`);
