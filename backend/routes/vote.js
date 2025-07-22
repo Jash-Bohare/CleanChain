@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const admin = require('firebase-admin');
-const db = admin.firestore();
 
-const checkConsensus = require('../utils/checkConsensus');
+const { db } = require("../firebase/config");
+
+const { rewardCleanup } = require('../controllers/verifyController');
 
 // POST /vote
 router.post('/', async (req, res) => {
@@ -28,7 +28,6 @@ router.post('/', async (req, res) => {
       return res.status(403).json({ error: 'You cannot vote on your own cleanup' });
     }
 
-    // Initialize votes array if not present
     const votes = locationData.votes || [];
 
     // Prevent double-voting
@@ -41,8 +40,23 @@ router.post('/', async (req, res) => {
     votes.push({ voterId, voteType });
     await locationRef.update({ votes });
 
-    // Check for consensus after vote
-    await checkConsensus(locationId, locationData);
+    // Re-fetch updated document
+    const updatedDoc = await locationRef.get();
+    const updatedData = updatedDoc.data();
+    const updatedVotes = updatedData.votes || [];
+
+    const positiveVotes = updatedVotes.filter(v => v.voteType === 'up').length;
+    const VOTE_THRESHOLD = 3;
+
+    console.log(`[Voting Debug] Total yes votes: ${positiveVotes}`);
+
+    if (positiveVotes >= VOTE_THRESHOLD && !updatedData.rewarded) {
+      console.log(`[Voting Debug] Threshold met! Triggering reward...`);
+      // Trigger token reward (this will update 'rewarded' and 'status' itself)
+      await rewardCleanup(locationId);
+      // Optionally, update 'verified' if you want a separate flag
+      await locationRef.update({ verified: true });
+    }
 
     return res.status(200).json({ message: 'Vote submitted successfully' });
   } catch (error) {
