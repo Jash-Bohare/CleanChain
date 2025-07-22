@@ -1,0 +1,12 @@
+// Dependencies you need to install in your React app:
+
+npm install @googlemaps/react-wrapper
+
+// Make sure you also have these (usually already in React apps):
+// - react
+// - react-dom
+
+// For styling, this component uses Tailwind CSS classes
+// If you don't have Tailwind, install it:
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
