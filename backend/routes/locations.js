@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { db } = require("../firebase/config");
 const { isNearby, calculateDistance } = require("../utils/isNearby");
-const sendClaimNotification = require("../utils/sendEmail");
+const { sendClaimNotification } = require("../utils/sendEmail");
 
 // GET /locations → returns all locations
 router.get("/locations", async (req, res) => {
