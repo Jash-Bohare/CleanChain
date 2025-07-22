@@ -1,80 +1,93 @@
 const { ethers } = require("ethers");
 const tokenContract = require("../blockchain/token");
 const { db } = require("../firebase/config");
-const sendEmail = require("../utils/sendEmail");
+const { sendRewardNotification } = require("../utils/sendEmail"); 
 
 const REWARD_AMOUNT = "10"; // 10 ECO
 
 const rewardCleanup = async (locationId) => {
   try {
-    // Fetch location data
+    // 1. Get location
     const locationRef = db.collection("locations").doc(locationId);
     const locationDoc = await locationRef.get();
 
     if (!locationDoc.exists) {
-      throw new Error(`Location with ID ${locationId} not found in database`);
+      throw new Error(`Location with ID ${locationId} not found`);
     }
 
     const location = locationDoc.data();
-    const userId = location.claimedBy;
+    const claimedBy = location.claimedBy;
 
-    if (!userId) {
+    if (!claimedBy) {
       throw new Error(`Location ${locationId} has no claimedBy field`);
     }
 
-    const normalizedUserId = userId.toLowerCase(); // 🔥 Normalize address
+    const normalizedUserId = claimedBy.toLowerCase(); // Normalize address
     const userRef = db.collection("users").doc(normalizedUserId);
-    const userDoc = await userRef.get();
+    let userDoc = await userRef.get();
 
+    // 2. Fallback if lowercase doc not found
     if (!userDoc.exists) {
-      throw new Error(`User with ID ${normalizedUserId} not found in users collection`);
+      console.warn(`[⚠️ User Not Found] Trying fallback search for: ${claimedBy}`);
+      const userQuerySnapshot = await db.collection("users")
+        .where("walletAddress", "==", claimedBy)
+        .limit(1)
+        .get();
+
+      if (!userQuerySnapshot.empty) {
+        userDoc = userQuerySnapshot.docs[0];
+      } else {
+        throw new Error(`User with wallet address ${claimedBy} not found in users collection`);
+      }
     }
 
     const user = userDoc.data();
+    const userWallet = user.walletAddress;
+
+    if (!userWallet) {
+      throw new Error(`User has no walletAddress in profile`);
+    }
 
     if (location.rewarded) {
-      console.log(`[✅ Already rewarded] Location ${locationId}`);
+      console.log(`[✅ Already Rewarded] Location ${locationId}`);
       return { status: "Already rewarded" };
     }
 
-    if (!user.walletAddress) {
-      throw new Error(`User ${normalizedUserId} has no walletAddress in their profile`);
-    }
+    console.log(`[🔁 Rewarding] Sending ${REWARD_AMOUNT} ECO to ${userWallet}`);
 
-    console.log(`[🔁 Rewarding] Sending ${REWARD_AMOUNT} ECO to ${user.walletAddress}`);
-
-    // Send tokens
+    // 3. Transfer tokens
     const tx = await tokenContract.transfer(
-      user.walletAddress,
+      userWallet,
       ethers.parseUnits(REWARD_AMOUNT, 18)
     );
     await tx.wait();
 
-    // Update Firestore: mark location as cleaned and rewarded
+    // 4. Update location
     await locationRef.update({
       status: "cleaned",
       rewarded: true,
       cleanedBy: normalizedUserId,
     });
 
-    // Optional: update user's token balance in DB (if you're tracking it off-chain)
-    await userRef.update({
+    // 5. Update user tokens
+    await db.collection("users").doc(userDoc.id).update({
       tokens: (user.tokens || 0) + parseInt(REWARD_AMOUNT),
       updatedAt: new Date(),
     });
 
-    // Email notification
+    // 6. Send email notification
     if (user.email) {
-      await sendEmail(
+      await sendRewardNotification( 
         user.email,
-        "Cleanup Verified 🎉",
-        `Congrats! You’ve earned ${REWARD_AMOUNT} ECO tokens for cleaning "${location.name}". Keep it green! 🌱`
+        user.name || "User",
+        location.name,
+        REWARD_AMOUNT
       );
     } else {
-      console.warn(`[📧 Skipped Email] No email found for user ${normalizedUserId}`);
+      console.warn(`[📧 Skipped Email] No email found for user ${claimedBy}`);
     }
 
-    console.log(`[✅ Reward Sent] ${REWARD_AMOUNT} ECO → ${user.walletAddress} for location ${locationId}`);
+    console.log(`[✅ Reward Sent] ${REWARD_AMOUNT} ECO → ${userWallet} for location ${locationId}`);
     return { status: "Success", txHash: tx.hash };
 
   } catch (err) {
