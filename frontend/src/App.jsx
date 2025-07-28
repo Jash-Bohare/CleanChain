@@ -7,7 +7,7 @@ import WelcomeStep1 from './pages/Welcome-step1';
 import WelcomeStep2 from './pages/Welcome-step2';
 import Profile from './pages/Profile';
 import Gallery from './pages/Gallery';
-import Dashboard from './pages/dashboard';
+import Dashboard from './pages/Dashboard';
 function App() {
   return (
     <Router>
@@ -20,7 +20,7 @@ function App() {
           <Route path="/Welcomestep2" element={<WelcomeStep2 />} />
           <Route path="/Profile" element={<Profile />} />
           <Route path="/Gallery" element={<Gallery/>} />
-          <Route path="/Dashboard " element={<Dashboard/>} />
+          <Route path="/dashboard" element={<Dashboard/>} />
 
         </Routes>
       </div>

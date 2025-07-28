@@ -36,9 +36,19 @@ All cleanup data is logged on the **blockchain** so it’s tamper-proof, visible
 | Layer         | Tools                                          |
 | ------------- | ---------------------------------------------- |
 | Mapping       | Google Maps JS SDK, Places API                 |
-| Backend       | Node.js + Express or Firebase                  |
-| Blockchain    | Solidity + Hardhat (Polygon)                   |
+| Backend       | Node.js + Express + Firebase Firestore         |
+| Blockchain    | Solidity + Hardhat (Polygon Sepolia)           |
 | Wallet Auth   | MetaMask / WalletConnect                       |
-| Media Storage | Firebase                                       |
-| Frontend      | React or Next.js                               |
+| Media Storage | Firebase + Local Uploads                       |
+| Frontend      | React + TypeScript + Vite                      |
+| Styling       | Tailwind CSS                                   |
 | Deployment    | Vercel (Frontend), Firebase / Render (Backend) |
+
+### Key Features
+
+- **Dashboard**: Real-time user statistics, claimed locations, and token balance
+- **Map Integration**: Interactive Google Maps with location claiming
+- **Community Voting**: Consensus-based cleanup verification
+- **Blockchain Rewards**: Automatic ECO token distribution
+- **Profile Management**: User profiles with cleanup history
+- **Gallery**: Community showcase of completed cleanups

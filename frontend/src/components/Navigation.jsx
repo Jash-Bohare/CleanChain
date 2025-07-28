@@ -25,7 +25,7 @@ const Navigation = () => {
             Profile
           </button>
           <button 
-            onClick={() => navigate('/Dashboard')}
+            onClick={() => navigate('/dashboard')}
             className="text-gray-400 hover:text-white transition-colors"
           >
             Dashboard
