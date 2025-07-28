@@ -1,372 +1,327 @@
 import React, { useState, useEffect } from 'react';
 import Navigation from '../components/Navigation';
 import Logo from '../components/Logo';
-import { ChevronUp, ChevronDown, MapPin, Calendar, Filter, Search, Grid, List } from 'lucide-react';
+import { ChevronUp, ChevronDown, MapPin, Calendar, Filter, Search, Grid, List, Heart, CheckCircle, Clock } from 'lucide-react';
+import { getGalleryLocations, submitVote } from '../api';
 
 const Gallery = () => {
   const [viewMode, setViewMode] = useState('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('recent');
   const [filterCategory, setFilterCategory] = useState('all');
-  
-  const [places, setPlaces] = useState([
-    {
-      id: 1,
-      name: 'Central Park',
-      location: 'New York, NY',
-      image: 'https://images.pexels.com/photos/378570/pexels-photo-378570.jpeg?auto=compress&cs=tinysrgb&w=400',
-      upvotes: 245,
-      downvotes: 12,
-      uploadedBy: 'alex_explorer',
-      uploadDate: '2024-01-15',
-      category: 'parks'
-    },
-    {
-      id: 2,
-      name: 'Golden Gate Bridge',
-      location: 'San Francisco, CA',
-      image: 'https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg?auto=compress&cs=tinysrgb&w=400',
-      upvotes: 189,
-      downvotes: 8,
-      uploadedBy: 'sarah_photos',
-      uploadDate: '2024-01-14',
-      category: 'landmarks'
-    },
-    {
-      id: 3,
-      name: 'Times Square',
-      location: 'New York, NY',
-      image: 'https://images.pexels.com/photos/378570/pexels-photo-378570.jpeg?auto=compress&cs=tinysrgb&w=400',
-      upvotes: 312,
-      downvotes: 23,
-      uploadedBy: 'mike_city',
-      uploadDate: '2024-01-13',
-      category: 'urban'
-    },
-    {
-      id: 4,
-      name: 'Yosemite Valley',
-      location: 'California, USA',
-      image: 'https://images.pexels.com/photos/933054/pexels-photo-933054.jpeg?auto=compress&cs=tinysrgb&w=400',
-      upvotes: 156,
-      downvotes: 5,
-      uploadedBy: 'nature_lover',
-      uploadDate: '2024-01-12',
-      category: 'nature'
-    },
-    {
-      id: 5,
-      name: 'Brooklyn Bridge',
-      location: 'New York, NY',
-      image: 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=400',
-      upvotes: 98,
-      downvotes: 3,
-      uploadedBy: 'brooklyn_walker',
-      uploadDate: '2024-01-11',
-      category: 'landmarks'
-    },
-    {
-      id: 6,
-      name: 'Santorini Sunset',
-      location: 'Santorini, Greece',
-      image: 'https://images.pexels.com/photos/161815/santorini-travel-vacation-europe-161815.jpeg?auto=compress&cs=tinysrgb&w=400',
-      upvotes: 427,
-      downvotes: 18,
-      uploadedBy: 'greek_islands',
-      uploadDate: '2024-01-10',
-      category: 'travel'
-    },
-    {
-      id: 7,
-      name: 'Tokyo Tower',
-      location: 'Tokyo, Japan',
-      image: 'https://images.pexels.com/photos/2070485/pexels-photo-2070485.jpeg?auto=compress&cs=tinysrgb&w=400',
-      upvotes: 203,
-      downvotes: 9,
-      uploadedBy: 'tokyo_nights',
-      uploadDate: '2024-01-09',
-      category: 'landmarks'
-    },
-    {
-      id: 8,
-      name: 'Grand Canyon',
-      location: 'Arizona, USA',
-      image: 'https://images.pexels.com/photos/1591447/pexels-photo-1591447.jpeg?auto=compress&cs=tinysrgb&w=400',
-      upvotes: 334,
-      downvotes: 14,
-      uploadedBy: 'canyon_explorer',
-      uploadDate: '2024-01-08',
-      category: 'nature'
-    }
-  ]);
+  const [places, setPlaces] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [votingStates, setVotingStates] = useState({});
+  const [walletAddress, setWalletAddress] = useState(null);
 
-  const [userVotes, setUserVotes] = useState({});
-
-  const categories = [
-    { value: 'all', label: 'All Places' },
-    { value: 'landmarks', label: 'Landmarks' },
-    { value: 'nature', label: 'Nature' },
-    { value: 'urban', label: 'Urban' },
-    { value: 'parks', label: 'Parks' },
-    { value: 'travel', label: 'Travel' }
-  ];
-
-  const sortOptions = [
-    { value: 'recent', label: 'Most Recent' },
-    { value: 'popular', label: 'Most Popular' },
-    { value: 'upvotes', label: 'Most Upvoted' },
-    { value: 'controversial', label: 'Most Controversial' }
-  ];
-
-  const handleVote = (placeId, voteType) => {
-    const currentVote = userVotes[placeId];
-    let newVote = null;
-
-    if (currentVote === voteType) {
-      // Remove vote if clicking the same button
-      newVote = null;
-    } else {
-      // Set new vote
-      newVote = voteType;
-    }
-
-    setUserVotes(prev => ({
-      ...prev,
-      [placeId]: newVote
-    }));
-
-    // Update place votes
-    setPlaces(prev => prev.map(place => {
-      if (place.id === placeId) {
-        let upvotes = place.upvotes;
-        let downvotes = place.downvotes;
-
-        // Remove previous vote effect
-        if (currentVote === 'up') upvotes--;
-        if (currentVote === 'down') downvotes--;
-
-        // Add new vote effect
-        if (newVote === 'up') upvotes++;
-        if (newVote === 'down') downvotes++;
-
-        return { ...place, upvotes, downvotes };
+  useEffect(() => {
+    const loadGalleryData = async () => {
+      try {
+        setLoading(true);
+        const address = localStorage.getItem('walletAddress');
+        setWalletAddress(address);
+        
+        const data = await getGalleryLocations();
+        setPlaces(data);
+      } catch (err) {
+        console.error('Error loading gallery data:', err);
+        setError('Failed to load gallery data');
+      } finally {
+        setLoading(false);
       }
-      return place;
-    }));
+    };
+
+    loadGalleryData();
+  }, []);
+
+  const handleVote = async (placeId, voteType) => {
+    if (!walletAddress) {
+      alert('Please connect your wallet to vote');
+      return;
+    }
+
+    try {
+      setVotingStates(prev => ({ ...prev, [placeId]: true }));
+      
+      await submitVote(placeId, voteType);
+      
+      // Refresh the gallery data to get updated vote counts
+      const updatedData = await getGalleryLocations();
+      setPlaces(updatedData);
+      
+      alert(`Vote submitted successfully! ${voteType === 'up' ? 'Upvoted' : 'Downvoted'}`);
+    } catch (error) {
+      console.error('Vote error:', error);
+      alert(error.message || 'Failed to submit vote');
+    } finally {
+      setVotingStates(prev => ({ ...prev, [placeId]: false }));
+    }
   };
 
-  const filteredAndSortedPlaces = places
-    .filter(place => {
-      const matchesSearch = place.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           place.location.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = filterCategory === 'all' || place.category === filterCategory;
-      return matchesSearch && matchesCategory;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'recent':
-          return new Date(b.uploadDate) - new Date(a.uploadDate);
-        case 'popular':
-          return (b.upvotes - b.downvotes) - (a.upvotes - a.downvotes);
-        case 'upvotes':
-          return b.upvotes - a.upvotes;
-        case 'controversial':
-          return (b.downvotes / Math.max(b.upvotes, 1)) - (a.downvotes / Math.max(a.upvotes, 1));
-        default:
-          return 0;
-      }
-    });
+  const hasUserVoted = (place) => {
+    if (!walletAddress) return false;
+    return place.votes?.some(vote => vote.voterId === walletAddress);
+  };
+
+  const getUserVote = (place) => {
+    if (!walletAddress) return null;
+    const userVote = place.votes?.find(vote => vote.voterId === walletAddress);
+    return userVote?.voteType;
+  };
+
+  const isUserOwner = (place) => {
+    return place.claimedBy === walletAddress;
+  };
+
+  const filteredPlaces = places.filter(place => {
+    const matchesSearch = place.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         `${place.lat}, ${place.lng}`.includes(searchTerm);
+    return matchesSearch;
+  });
+
+  const sortedPlaces = [...filteredPlaces].sort((a, b) => {
+    switch (sortBy) {
+      case 'recent':
+        return new Date(b.claimedAt) - new Date(a.claimedAt);
+      case 'upvotes':
+        return b.upvotes - a.upvotes;
+      case 'downvotes':
+        return b.downvotes - a.downvotes;
+      default:
+        return 0;
+    }
+  });
 
   const PlaceCard = ({ place }) => {
-    const userVote = userVotes[place.id];
-    const netVotes = place.upvotes - place.downvotes;
+    const userVote = getUserVote(place);
+    const hasVoted = hasUserVoted(place);
+    const isOwner = isUserOwner(place);
+    const isVoting = votingStates[place.id];
 
     return (
       <div className="bg-[#1a1a1a] border border-gray-700 rounded-lg overflow-hidden hover:border-gray-600 hover:shadow-lg transition-all group">
+        {/* Before and After Photos */}
         <div className="relative">
-          <img 
-            src={place.image} 
-            alt={place.name}
-            className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-          <div className="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm rounded-lg px-2 py-1">
-            <span className="text-white text-sm font-medium">+{netVotes}</span>
+          <div className="grid grid-cols-2 gap-1">
+            <div className="relative">
+              <img 
+                src={place.beforePhotoUrl || 'https://images.pexels.com/photos/378570/pexels-photo-378570.jpeg?auto=compress&cs=tinysrgb&w=400'} 
+                alt="Before cleanup"
+                className="w-full h-32 sm:h-48 object-cover"
+              />
+              <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-sm rounded px-2 py-1">
+                <span className="text-white text-xs font-medium">Before</span>
+              </div>
+            </div>
+            <div className="relative">
+              <img 
+                src={place.afterPhotoUrl} 
+                alt="After cleanup"
+                className="w-full h-32 sm:h-48 object-cover"
+              />
+              <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-sm rounded px-2 py-1">
+                <span className="text-white text-xs font-medium">After</span>
+              </div>
+            </div>
           </div>
+          
+          {/* Reward Badge */}
+          {place.rewardTokens && (
+            <div className="absolute top-2 right-2 bg-yellow-600/90 backdrop-blur-sm rounded-lg px-2 py-1 flex items-center space-x-1">
+              <span className="text-white text-xs font-medium">+{place.rewardTokens} ECO</span>
+            </div>
+          )}
         </div>
         
         <div className="p-4">
-          <h3 className="text-white font-semibold mb-2 group-hover:text-blue-400 transition-colors">
+          <h3 className="text-white font-semibold mb-2 group-hover:text-blue-400 transition-colors text-sm sm:text-base">
             {place.name}
           </h3>
-          <div className="flex items-center space-x-2 mb-3">
-            <MapPin className="text-gray-400" size={14} />
-            <span className="text-gray-400 text-sm">{place.location}</span>
+          
+          <div className="flex items-center space-x-2 mb-2">
+            <MapPin className="text-gray-400" size={12} />
+            <span className="text-gray-400 text-xs sm:text-sm">
+              {place.lat?.toFixed(4)}, {place.lng?.toFixed(4)}
+            </span>
           </div>
           
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-2">
-              <Calendar className="text-gray-400" size={14} />
-              <span className="text-gray-400 text-sm">
-                {new Date(place.uploadDate).toLocaleDateString()}
-              </span>
-            </div>
-            <span className="text-gray-400 text-sm">@{place.uploadedBy}</span>
+          <div className="flex items-center space-x-2 mb-3">
+            <Calendar className="text-gray-400" size={12} />
+            <span className="text-gray-400 text-xs sm:text-sm">
+              {place.claimedAt ? new Date(place.claimedAt).toLocaleDateString() : 'Unknown date'}
+            </span>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-1">
+          {/* Vote Counts */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-1">
+                <ChevronUp className="text-green-400" size={16} />
+                <span className="text-green-400 text-sm font-medium">{place.upvotes}</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <ChevronDown className="text-red-400" size={16} />
+                <span className="text-red-400 text-sm font-medium">{place.downvotes}</span>
+              </div>
+            </div>
+            <div className="text-gray-400 text-xs">
+              {place.totalVotes} votes
+            </div>
+          </div>
+
+          {/* Voting Buttons */}
+          {!isOwner && (
+            <div className="flex space-x-2">
               <button
                 onClick={() => handleVote(place.id, 'up')}
-                className={`p-2 rounded-lg transition-all ${
+                disabled={hasVoted || isVoting}
+                className={`flex-1 flex items-center justify-center space-x-1 py-2 px-3 rounded-lg transition-colors text-sm font-medium ${
                   userVote === 'up' 
                     ? 'bg-green-600 text-white' 
-                    : 'bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white'
+                    : hasVoted 
+                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                      : 'bg-green-600/20 text-green-400 hover:bg-green-600/30'
                 }`}
               >
                 <ChevronUp size={16} />
+                <span>Upvote</span>
               </button>
-              <span className="text-white text-sm font-medium w-8 text-center">
-                {place.upvotes}
-              </span>
-            </div>
-
-            <div className="flex items-center space-x-1">
+              
               <button
                 onClick={() => handleVote(place.id, 'down')}
-                className={`p-2 rounded-lg transition-all ${
+                disabled={hasVoted || isVoting}
+                className={`flex-1 flex items-center justify-center space-x-1 py-2 px-3 rounded-lg transition-colors text-sm font-medium ${
                   userVote === 'down' 
                     ? 'bg-red-600 text-white' 
-                    : 'bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white'
+                    : hasVoted 
+                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                      : 'bg-red-600/20 text-red-400 hover:bg-red-600/30'
                 }`}
               >
                 <ChevronDown size={16} />
+                <span>Downvote</span>
               </button>
-              <span className="text-white text-sm font-medium w-8 text-center">
-                {place.downvotes}
-              </span>
             </div>
-          </div>
+          )}
+
+          {isOwner && (
+            <div className="text-center py-2 px-3 bg-blue-600/20 text-blue-400 rounded-lg text-sm">
+              Your cleanup - waiting for community votes
+            </div>
+          )}
+
+          {hasVoted && !isOwner && (
+            <div className="text-center py-2 px-3 bg-gray-600/20 text-gray-400 rounded-lg text-sm">
+              You voted: {userVote === 'up' ? 'Upvoted' : 'Downvoted'}
+            </div>
+          )}
         </div>
       </div>
     );
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center">
+        <div className="text-white text-xl">Loading Gallery...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center">
+        <div className="text-red-400 text-xl">{error}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0d0d0d] relative">
       <Navigation />
       
-      <div className="pt-20 px-6 max-w-7xl mx-auto">
+      <div className="pt-16 sm:pt-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6 sm:mb-8 gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
             <Logo />
             <div>
-              <h1 className="text-white text-3xl font-bold">Gallery</h1>
+              <h1 className="text-white text-2xl sm:text-3xl font-bold">Gallery</h1>
               <p className="text-gray-400 text-sm">
-                Discover and vote on amazing places
+                Vote on community cleanups and help verify environmental impact
               </p>
             </div>
           </div>
           
-          <div className="flex items-center space-x-3">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-lg transition-colors ${
-                viewMode === 'grid' 
-                  ? 'bg-white text-black' 
-                  : 'bg-gray-700 text-gray-400 hover:text-white'
-              }`}
-            >
-              <Grid size={16} />
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-2 rounded-lg transition-colors ${
-                viewMode === 'list' 
-                  ? 'bg-white text-black' 
-                  : 'bg-gray-700 text-gray-400 hover:text-white'
-              }`}
-            >
-              <List size={16} />
-            </button>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 bg-[#1a1a1a] border border-gray-700 rounded-lg p-2">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded transition-colors ${
+                  viewMode === 'grid' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                <Grid size={20} />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded transition-colors ${
+                  viewMode === 'list' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                <List size={20} />
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Controls */}
-        <div className="bg-[#1a1a1a] border border-gray-700 rounded-lg p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Search */}
+        {/* Filters and Search */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+          <div className="flex items-center space-x-4">
             <div className="relative">
-              <Search className="absolute left-3 top-3 text-gray-400" size={16} />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
               <input
                 type="text"
-                placeholder="Search places..."
+                placeholder="Search locations..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-[#0d0d0d] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white focus:ring-1 focus:ring-white"
+                className="pl-10 pr-4 py-2 bg-[#1a1a1a] border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
               />
             </div>
-
-            {/* Category Filter */}
-            <div className="relative">
-              <Filter className="absolute left-3 top-3 text-gray-400" size={16} />
-              <select
-                value={filterCategory}
-                onChange={(e) => setFilterCategory(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-[#0d0d0d] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-white focus:ring-1 focus:ring-white appearance-none"
-              >
-                {categories.map(category => (
-                  <option key={category.value} value={category.value}>
-                    {category.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Sort */}
-            <div>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-4 py-2 bg-[#0d0d0d] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-white focus:ring-1 focus:ring-white appearance-none"
-              >
-                {sortOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Results Count */}
-            <div className="flex items-center justify-center">
-              <span className="text-gray-400 text-sm">
-                {filteredAndSortedPlaces.length} places found
-              </span>
-            </div>
+            
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="px-4 py-2 bg-[#1a1a1a] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+            >
+              <option value="recent">Most Recent</option>
+              <option value="upvotes">Most Upvotes</option>
+              <option value="downvotes">Most Downvotes</option>
+            </select>
+          </div>
+          
+          <div className="text-gray-400 text-sm">
+            {sortedPlaces.length} cleanup{sortedPlaces.length !== 1 ? 's' : ''} to vote on
           </div>
         </div>
 
-        {/* Places Grid */}
-        <div className={`grid gap-6 ${
-          viewMode === 'grid' 
-            ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
-            : 'grid-cols-1'
-        }`}>
-          {filteredAndSortedPlaces.map((place) => (
-            <PlaceCard key={place.id} place={place} />
-          ))}
-        </div>
-
-        {filteredAndSortedPlaces.length === 0 && (
+        {/* Gallery Content */}
+        {sortedPlaces.length === 0 ? (
           <div className="text-center py-12">
-            <div className="w-16 h-16 bg-gray-700 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <Search className="text-gray-400" size={24} />
-            </div>
-            <h3 className="text-white text-lg font-semibold mb-2">No places found</h3>
-            <p className="text-gray-400 text-sm">
-              Try adjusting your search or filter criteria
-            </p>
+            <Heart className="text-gray-400 mx-auto mb-4" size={48} />
+            <p className="text-gray-400 text-lg">No cleanups to vote on yet</p>
+            <p className="text-gray-500 text-sm mt-2">Check back later for new community cleanups!</p>
+          </div>
+        ) : (
+          <div className={`grid gap-4 sm:gap-6 ${
+            viewMode === 'grid' 
+              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+              : 'grid-cols-1'
+          }`}>
+            {sortedPlaces.map((place) => (
+              <PlaceCard key={place.id} place={place} />
+            ))}
           </div>
         )}
       </div>

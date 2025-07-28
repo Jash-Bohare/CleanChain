@@ -90,3 +90,32 @@ export const uploadAfterImage = async (locationId, imageFile) => {
   if (!res.ok) throw new Error("Failed to upload image");
   return await res.json();
 };
+
+// Get all locations with after photos for gallery
+export const getGalleryLocations = async () => {
+  const res = await fetch("http://localhost:5000/api/gallery/locations");
+  if (!res.ok) throw new Error("Failed to fetch gallery locations");
+  return await res.json();
+};
+
+// Submit vote for a location
+export const submitVote = async (locationId, voteType) => {
+  const walletAddress = localStorage.getItem('walletAddress');
+  if (!walletAddress) throw new Error("No wallet connected");
+
+  const res = await fetch("http://localhost:5000/api/vote", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ 
+      voterId: walletAddress, 
+      locationId, 
+      voteType 
+    }),
+  });
+  
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.error || "Failed to submit vote");
+  }
+  return await res.json();
+};

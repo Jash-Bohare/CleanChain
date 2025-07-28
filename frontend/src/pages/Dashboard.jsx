@@ -57,8 +57,10 @@ const Dashboard = () => {
     return () => clearInterval(timer);
   };
 
-  const getStatusIcon = (status, cleaned, rewarded) => {
-    if (cleaned && rewarded) {
+  const getStatusIcon = (status, cleaned, rewarded, verified) => {
+    if (verified) {
+      return <CheckCircle className="text-green-400" size={16} />;
+    } else if (cleaned && rewarded) {
       return <CheckCircle className="text-green-400" size={16} />;
     } else if (cleaned && !rewarded) {
       return <Clock className="text-blue-400" size={16} />;
@@ -71,8 +73,10 @@ const Dashboard = () => {
     }
   };
 
-  const getStatusText = (status, cleaned, rewarded) => {
-    if (cleaned && rewarded) {
+  const getStatusText = (status, cleaned, rewarded, verified) => {
+    if (verified) {
+      return 'Verified';
+    } else if (cleaned && rewarded) {
       return 'Rewarded';
     } else if (cleaned && !rewarded) {
       return 'Cleaned';
@@ -85,8 +89,10 @@ const Dashboard = () => {
     }
   };
 
-  const getStatusColor = (status, cleaned, rewarded) => {
-    if (cleaned && rewarded) {
+  const getStatusColor = (status, cleaned, rewarded, verified) => {
+    if (verified) {
+      return 'text-green-400';
+    } else if (cleaned && rewarded) {
       return 'text-green-400';
     } else if (cleaned && !rewarded) {
       return 'text-blue-400';
@@ -101,7 +107,9 @@ const Dashboard = () => {
 
   const calculateStats = () => {
     const totalPlacesClaimed = claimedPlaces.length;
-    const totalCleaned = claimedPlaces.filter(place => place.cleaned).length;
+    const totalCleaned = claimedPlaces.filter(place => place.cleaned || place.verified).length;
+    const totalVerified = claimedPlaces.filter(place => place.verified).length;
+    const totalRewarded = claimedPlaces.filter(place => place.rewarded).length;
     const totalUpvotes = claimedPlaces.reduce((sum, place) => {
       const votes = place.votes || [];
       return sum + votes.filter(v => v.voteType === 'up').length;
@@ -110,6 +118,8 @@ const Dashboard = () => {
     return {
       totalPlacesClaimed,
       totalCleaned,
+      totalVerified,
+      totalRewarded,
       totalUpvotes
     };
   };
@@ -174,9 +184,10 @@ const Dashboard = () => {
         tokenBalance: balanceData.tokenBalance || 0
       });
 
-      // Set claimed places and log for debugging
-      console.log('Dashboard - User Locations Data:', locationsData.locations);
-      setClaimedPlaces(locationsData.locations || []);
+                        // Set claimed places and log for debugging
+                  console.log('Dashboard - User Locations Data:', locationsData.locations);
+                  console.log('Dashboard - Total locations found:', locationsData.locations?.length || 0);
+                  setClaimedPlaces(locationsData.locations || []);
 
       // Animate token counter
       animateTokenCounter(balanceData.tokenBalance || 0);
@@ -246,51 +257,62 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          <div className="bg-[#1a1a1a] border border-gray-700 rounded-lg p-4 sm:p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-xs sm:text-sm">Total Claimed</p>
-                <p className="text-white text-xl sm:text-2xl font-bold">{stats.totalPlacesClaimed}</p>
-              </div>
-              <MapPin className="text-blue-400" size={20} />
-            </div>
-          </div>
-          
-          <div className="bg-[#1a1a1a] border border-gray-700 rounded-lg p-4 sm:p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-xs sm:text-sm">Total Cleaned</p>
-                <p className="text-white text-xl sm:text-2xl font-bold">{stats.totalCleaned}</p>
-              </div>
-              <CheckCircle className="text-green-400" size={20} />
-            </div>
-          </div>
-          
-          <div className="bg-[#1a1a1a] border border-gray-700 rounded-lg p-4 sm:p-6 sm:col-span-2 lg:col-span-1">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-xs sm:text-sm">Total Upvotes</p>
-                <p className="text-white text-xl sm:text-2xl font-bold">{stats.totalUpvotes}</p>
-              </div>
-              <Heart className="text-red-400" size={20} />
-            </div>
-          </div>
-        </div>
+                            {/* Stats Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                      <div className="bg-[#1a1a1a] border border-gray-700 rounded-lg p-4 sm:p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-gray-400 text-xs sm:text-sm">Total Claimed</p>
+                            <p className="text-white text-xl sm:text-2xl font-bold">{stats.totalPlacesClaimed}</p>
+                          </div>
+                          <MapPin className="text-blue-400" size={20} />
+                        </div>
+                      </div>
+                      
+                      <div className="bg-[#1a1a1a] border border-gray-700 rounded-lg p-4 sm:p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-gray-400 text-xs sm:text-sm">Total Cleaned</p>
+                            <p className="text-white text-xl sm:text-2xl font-bold">{stats.totalCleaned}</p>
+                          </div>
+                          <CheckCircle className="text-green-400" size={20} />
+                        </div>
+                      </div>
+                      
+                      <div className="bg-[#1a1a1a] border border-gray-700 rounded-lg p-4 sm:p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-gray-400 text-xs sm:text-sm">Total Verified</p>
+                            <p className="text-white text-xl sm:text-2xl font-bold">{stats.totalVerified}</p>
+                          </div>
+                          <CheckCircle className="text-blue-400" size={20} />
+                        </div>
+                      </div>
+                      
+                      <div className="bg-[#1a1a1a] border border-gray-700 rounded-lg p-4 sm:p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-gray-400 text-xs sm:text-sm">Total Rewarded</p>
+                            <p className="text-white text-xl sm:text-2xl font-bold">{stats.totalRewarded}</p>
+                          </div>
+                          <Heart className="text-yellow-400" size={20} />
+                        </div>
+                      </div>
+                    </div>
 
-        {/* Claimed Places Section */}
-        <div className="mb-0 pb-8 sm:pb-12">
-          <div className="mb-4 sm:mb-6">
-            <h2 className="text-white text-xl sm:text-2xl font-bold">Your Claimed Places</h2>
-          </div>
+                            {/* User Locations Section */}
+                    <div className="mb-0 pb-8 sm:pb-12">
+                      <div className="mb-4 sm:mb-6">
+                        <h2 className="text-white text-xl sm:text-2xl font-bold">Your Locations</h2>
+                        <p className="text-gray-400 text-sm mt-1">All your claimed, cleaned, and verified locations</p>
+                      </div>
 
-          {claimedPlaces.length === 0 ? (
-            <div className="text-center py-8 sm:py-12">
-              <MapPin className="text-gray-400 mx-auto mb-4" size={48} />
-              <p className="text-gray-400 text-base sm:text-lg">No places claimed yet</p>
-              <p className="text-gray-500 text-sm mt-2">Start by claiming a location on the map!</p>
-            </div>
+                                {claimedPlaces.length === 0 ? (
+                        <div className="text-center py-8 sm:py-12">
+                          <MapPin className="text-gray-400 mx-auto mb-4" size={48} />
+                          <p className="text-gray-400 text-base sm:text-lg">No locations yet</p>
+                          <p className="text-gray-500 text-sm mt-2">Start by claiming a location on the map!</p>
+                        </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {claimedPlaces.map((place) => (
@@ -301,12 +323,12 @@ const Dashboard = () => {
                       alt={place.name}
                       className="w-full h-32 sm:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                     />
-                    <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-black/70 backdrop-blur-sm rounded-lg px-2 py-1 flex items-center space-x-1">
-                      {getStatusIcon(place.status, place.cleaned, place.rewarded)}
-                      <span className={`text-xs sm:text-sm font-medium ${getStatusColor(place.status, place.cleaned, place.rewarded)}`}>
-                        {getStatusText(place.status, place.cleaned, place.rewarded)}
-                      </span>
-                    </div>
+                                                    <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-black/70 backdrop-blur-sm rounded-lg px-2 py-1 flex items-center space-x-1">
+                                  {getStatusIcon(place.status, place.cleaned, place.rewarded, place.verified)}
+                                  <span className={`text-xs sm:text-sm font-medium ${getStatusColor(place.status, place.cleaned, place.rewarded, place.verified)}`}>
+                                    {getStatusText(place.status, place.cleaned, place.rewarded, place.verified)}
+                                  </span>
+                                </div>
                     
                     {/* Reward badge for cleaned locations */}
                     {place.rewarded && (
