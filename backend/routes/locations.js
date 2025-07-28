@@ -187,4 +187,48 @@ router.get("/test-distance", (req, res) => {
   });
 });
 
+// GET /gallery/locations → returns locations with after photos for voting
+router.get("/gallery/locations", async (req, res) => {
+  try {
+    const snapshot = await db.collection("locations").get();
+    const galleryLocations = [];
+
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+
+      // Only include locations that have after photos uploaded
+      if (data.afterPhotoUrl && data.afterImageUploaded && !data.cleaned) {
+        const votes = data.votes || [];
+        const upvotes = votes.filter(v => v.voteType === 'up').length;
+        const downvotes = votes.filter(v => v.voteType === 'down').length;
+
+        galleryLocations.push({
+          id: doc.id,
+          name: data.name,
+          lat: data.lat,
+          lng: data.lng,
+          beforePhotoUrl: data.beforePhotoUrl,
+          afterPhotoUrl: data.afterPhotoUrl,
+          claimedBy: data.claimedBy,
+          claimedAt: data.claimedAt,
+          rewardTokens: data.rewardTokens,
+          upvotes,
+          downvotes,
+          totalVotes: votes.length,
+          votes: votes, // Include full votes array for checking if user has voted
+          status: 'awaiting_verification'
+        });
+      }
+    });
+
+    // Sort by most recent first
+    galleryLocations.sort((a, b) => new Date(b.claimedAt) - new Date(a.claimedAt));
+
+    res.json(galleryLocations);
+  } catch (err) {
+    console.error("Error fetching gallery locations:", err);
+    res.status(500).json({ error: "Failed to fetch gallery locations" });
+  }
+});
+
 module.exports = router;

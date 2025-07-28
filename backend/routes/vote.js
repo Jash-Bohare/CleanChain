@@ -52,10 +52,12 @@ router.post('/', async (req, res) => {
 
     if (positiveVotes >= VOTE_THRESHOLD && !updatedData.rewarded) {
       console.log(`[Voting Debug] Threshold met! Triggering reward...`);
-      // Trigger token reward (this will update 'rewarded' and 'status' itself)
+      console.log(`[🎯 Vote Count] Upvotes: ${positiveVotes}, Threshold: ${VOTE_THRESHOLD}`);
+      // Trigger token reward (this will update 'rewarded', 'status', and 'cleaned')
       await rewardCleanup(locationId);
-      // Optionally, update 'verified' if you want a separate flag
+      // Update 'verified' flag as well
       await locationRef.update({ verified: true });
+      console.log(`[✅ Vote Complete] Location ${locationId} has been cleaned and verified`);
     }
 
     return res.status(200).json({ message: 'Vote submitted successfully' });
