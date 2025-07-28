@@ -63,11 +63,14 @@ const rewardCleanup = async (locationId) => {
     await tx.wait();
 
     // 4. Update location
+    console.log(`[🔧 Updating Location] Setting cleaned: true for location ${locationId}`);
     await locationRef.update({
       status: "cleaned",
       rewarded: true,
+      cleaned: true, // This was missing! This is crucial for map markers
       cleanedBy: normalizedUserId,
     });
+    console.log(`[✅ Location Updated] Location ${locationId} marked as cleaned`);
 
     // 5. Update user tokens
     await db.collection("users").doc(userDoc.id).update({

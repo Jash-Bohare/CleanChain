@@ -3,7 +3,7 @@ const router = express.Router();
 const { db } = require('../firebase/config');
 const tokenContract = require('../blockchain/token');
 
-// Get claimed and cleaned locations for a user
+// Get all user locations (claimed, cleaned, verified, etc.)
 router.get('/:userId/locations', async (req, res) => {
   const userId = req.params.userId;
 
@@ -25,39 +25,52 @@ router.get('/:userId/locations', async (req, res) => {
         claimedAt: data.claimedAt,
         votes: data.votes || [],
         rewarded: data.rewarded || false,
+        verified: data.verified || false,
       };
 
-      // Apply the correct status logic based on the cleanup flow
+      // Include ALL locations with proper status determination
+      let status = "claimed";
+      let cleaned = false;
+      let afterPhotoUrl = null;
+      let afterImageUploaded = false;
+      let cleanedBy = null;
+
+      // Determine the actual status based on the data
       if (data.cleaned === true) {
-        // Location has been cleaned and verified
-        userLocations.push({
-          ...base,
-          status: "cleaned",
-          cleaned: true,
-          cleanedBy: data.cleanedBy || null,
-          afterPhotoUrl: data.afterPhotoUrl || null,
-          afterImageUploaded: data.afterImageUploaded || false,
-        });
+        status = "cleaned";
+        cleaned = true;
+        afterPhotoUrl = data.afterPhotoUrl || null;
+        afterImageUploaded = data.afterImageUploaded || false;
+        cleanedBy = data.cleanedBy || null;
       } else if (data.afterPhotoUrl && data.afterImageUploaded) {
-        // Photo uploaded but not yet cleaned/verified
-        userLocations.push({
-          ...base,
-          status: "photo_uploaded",
-          cleaned: false,
-          afterPhotoUrl: data.afterPhotoUrl,
-          afterImageUploaded: true,
-        });
+        status = "photo_uploaded";
+        cleaned = false;
+        afterPhotoUrl = data.afterPhotoUrl;
+        afterImageUploaded = true;
       } else if (data.claimedBy) {
-        // Just claimed, no photo uploaded yet
-        userLocations.push({
-          ...base,
-          status: "claimed",
-          cleaned: false,
-          afterPhotoUrl: null,
-          afterImageUploaded: false,
-        });
+        status = "claimed";
+        cleaned = false;
+        afterPhotoUrl = null;
+        afterImageUploaded = false;
       }
+
+      // Add verified status if applicable
+      if (data.verified === true) {
+        status = "verified";
+      }
+
+      userLocations.push({
+        ...base,
+        status,
+        cleaned,
+        afterPhotoUrl,
+        afterImageUploaded,
+        cleanedBy,
+      });
     });
+
+    // Sort by claimed date (most recent first)
+    userLocations.sort((a, b) => new Date(b.claimedAt) - new Date(a.claimedAt));
 
     res.status(200).json({ locations: userLocations });
   } catch (error) {
