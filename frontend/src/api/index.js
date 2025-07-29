@@ -44,6 +44,14 @@ export const testDistance = async ({ lat1, lng1, lat2, lng2 }) => {
   return await res.json();
 };
 
+// Debug distance calculation for troubleshooting
+export const debugDistance = async ({ lat1, lng1, lat2, lng2 }) => {
+  const params = new URLSearchParams({ lat1, lng1, lat2, lng2 });
+  const res = await fetch(`http://localhost:5000/api/debug-distance?${params.toString()}`);
+  if (!res.ok) throw new Error("Failed to debug distance");
+  return await res.json();
+};
+
 // Get user's claimed and cleaned locations
 export const getUserLocations = async (walletAddress) => {
   const res = await fetch(`http://localhost:5000/api/user/${walletAddress}/locations`);
