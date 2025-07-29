@@ -21,8 +21,8 @@ function calculateDistance(lat1, lng1, lat2, lng2) {
   return R * c;
 }
 
-// Returns true if distance is within threshold (default 10000 meters)
-function isNearby(userLat, userLng, spotLat, spotLng, threshold = 10000) {
+// Returns true if distance is within threshold (default 15000 meters)
+function isNearby(userLat, userLng, spotLat, spotLng, threshold = 15000) {
   const distance = calculateDistance(userLat, userLng, spotLat, spotLng);
   return distance <= threshold;
 }

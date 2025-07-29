@@ -82,12 +82,17 @@ router.post("/claim-location", async (req, res) => {
       }
     }
 
-    // Distance check
+    // Distance check - using consistent 15km threshold
     const distance = calculateDistance(userLat, userLng, location.lat, location.lng);
-    if (distance > 10000) {
+    const isWithinRange = isNearby(userLat, userLng, location.lat, location.lng, 15000);
+    
+    if (!isWithinRange) {
       return res.status(403).json({
         status: "too far",
         distance: parseFloat(distance.toFixed(2)),
+        threshold: 15000,
+        userLocation: { lat: userLat, lng: userLng },
+        locationCoords: { lat: location.lat, lng: location.lng }
       });
     }
 
@@ -108,7 +113,10 @@ router.post("/claim-location", async (req, res) => {
       await sendClaimNotification(userEmail, userName, location.name);
     }
 
-    return res.status(200).json({ status: "claimed" });
+    return res.status(200).json({ 
+      status: "claimed",
+      distance: parseFloat(distance.toFixed(2))
+    });
 
   } catch (err) {
     console.error("Error in claim-location:", err);
@@ -164,26 +172,60 @@ router.get("/test-distance", (req, res) => {
   const lat2Num = parseFloat(lat2);
   const lng2Num = parseFloat(lng2);
 
-  const toRad = (value) => (value * Math.PI) / 180;
-  const R = 6371000;
-
-  const dLat = toRad(lat2Num - lat1Num);
-  const dLng = toRad(lng2Num - lng1Num);
-
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1Num)) *
-    Math.cos(toRad(lat2Num)) *
-    Math.sin(dLng / 2) ** 2;
-
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  const distance = R * c;
+  // Use the same calculateDistance function for consistency
+  const distance = calculateDistance(lat1Num, lng1Num, lat2Num, lng2Num);
+  const isWithinRange = isNearby(lat1Num, lng1Num, lat2Num, lng2Num, 15000);
 
   res.status(200).json({
     point1: { lat: lat1Num, lng: lng1Num },
     point2: { lat: lat2Num, lng: lng2Num },
     distanceInMeters: Math.round(distance),
-    isNearby: distance <= 10000,
+    isNearby: isWithinRange,
+    threshold: 15000
+  });
+});
+
+// GET /debug-distance - for troubleshooting distance issues
+router.get("/debug-distance", (req, res) => {
+  const { lat1, lng1, lat2, lng2 } = req.query;
+
+  if (!lat1 || !lng1 || !lat2 || !lng2) {
+    return res.status(400).json({ error: "Missing coordinates" });
+  }
+
+  const lat1Num = parseFloat(lat1);
+  const lng1Num = parseFloat(lng1);
+  const lat2Num = parseFloat(lat2);
+  const lng2Num = parseFloat(lng2);
+
+  // Calculate distance using the utility function
+  const distance = calculateDistance(lat1Num, lng1Num, lat2Num, lng2Num);
+  const isWithinRange = isNearby(lat1Num, lng1Num, lat2Num, lng2Num, 15000);
+
+  // Also calculate using the old method for comparison
+  const toRad = (value) => (value * Math.PI) / 180;
+  const R = 6371000;
+  const dLat = toRad(lat2Num - lat1Num);
+  const dLng = toRad(lng2Num - lng1Num);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1Num)) * Math.cos(toRad(lat2Num)) * Math.sin(dLng / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const oldDistance = R * c;
+
+  res.status(200).json({
+    point1: { lat: lat1Num, lng: lng1Num },
+    point2: { lat: lat2Num, lng: lng2Num },
+    utilityDistance: Math.round(distance),
+    oldMethodDistance: Math.round(oldDistance),
+    difference: Math.round(Math.abs(distance - oldDistance)),
+    isNearby: isWithinRange,
+    threshold: 15000,
+    thresholdKm: 15,
+    coordinates: {
+      lat1: lat1Num,
+      lng1: lng1Num,
+      lat2: lat2Num,
+      lng2: lng2Num
+    }
   });
 });
 

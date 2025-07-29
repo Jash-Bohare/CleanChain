@@ -167,32 +167,27 @@ const MapView = () => {
               ? { ...loc, status: 'claimed', claimedBy: walletAddress, claimedAt: new Date().toISOString() }
               : loc
           ));
-          const msg = `<div style='color:#22c55e;padding:8px;'>Location successfully claimed!</div>`;
+          const distance = res.distance ? ` (${Math.round(res.distance)}m away)` : '';
+          const msg = `<div style='color:#22c55e;padding:8px;'>Location successfully claimed!${distance}</div>`;
           infoWindow.setContent(msg);
           infoWindow.open(googleMarker.getMap(), googleMarker);
           infoWindowRef.current = infoWindow;
-          setToast('You have successfully claimed this location!');
+          setToast(`You have successfully claimed this location!${distance}`);
           setTimeout(() => setToast(null), 3000);
         } else if (res.status === 'too far') {
-          try {
-            const distRes = await testDistance({
-              lat1: userLat,
-              lng1: userLng,
-              lat2: marker.lat,
-              lng2: marker.lng
-            });
-            const msg = `<div style='color:#b91c1c;padding:8px;'>You are too far to claim this location.<br/>Distance: <strong>${distRes.distanceInMeters} meters</strong> (must be within 10000 meters).</div>`;
-            infoWindow.setContent(msg);
-            infoWindow.open(googleMarker.getMap(), googleMarker);
-            infoWindowRef.current = infoWindow;
-            alert(`You are too far to claim this location. Distance: ${distRes.distanceInMeters} meters (must be within 10000 meters).`);
-          } catch (distErr) {
-            const msg = `<div style='color:#b91c1c;padding:8px;'>You are too far to claim this location. (Distance check failed)</div>`;
-            infoWindow.setContent(msg);
-            infoWindow.open(googleMarker.getMap(), googleMarker);
-            infoWindowRef.current = infoWindow;
-            alert('You are too far to claim this location. (Distance check failed)');
-          }
+          // Use the distance information from the backend response
+          const distance = res.distance || 0;
+          const threshold = res.threshold || 15000;
+          const msg = `<div style='color:#b91c1c;padding:8px;'>
+            You are too far to claim this location.<br/>
+            Distance: <strong>${Math.round(distance)} meters</strong> (must be within ${threshold/1000}km).<br/>
+            Your location: ${res.userLocation?.lat?.toFixed(6)}, ${res.userLocation?.lng?.toFixed(6)}<br/>
+            Location: ${res.locationCoords?.lat?.toFixed(6)}, ${res.locationCoords?.lng?.toFixed(6)}
+          </div>`;
+          infoWindow.setContent(msg);
+          infoWindow.open(googleMarker.getMap(), googleMarker);
+          infoWindowRef.current = infoWindow;
+          alert(`You are too far to claim this location. Distance: ${Math.round(distance)} meters (must be within ${threshold/1000}km).`);
         } else {
           const msg = `<div style='color:#b91c1c;padding:8px;'>${res.status || 'Failed to claim location.'}</div>`;
           infoWindow.setContent(msg);
@@ -248,7 +243,7 @@ const MapView = () => {
           </Wrapper>
         </div>
         <div className="mt-4 text-center text-gray-400 text-sm">
-          Locations are managed by CleanChain admins. Click a marker to view details. Unclaimed locations can be claimed if you are nearby.
+          Locations are managed by CleanChain admins. Click a marker to view details. Unclaimed locations can be claimed if you are within 15km.
         </div>
       </div>
     </div>
