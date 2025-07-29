@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Navigation from '../components/Navigation';
 import Logo from '../components/Logo';
-import { User, Mail, Wallet, Edit3, Save, X, Calendar } from 'lucide-react';
+import { User, Mail, Edit3, Save, X, Calendar } from 'lucide-react';
 
 const Profile = () => {
   const [userInfo, setUserInfo] = useState({
@@ -211,7 +211,7 @@ const Profile = () => {
         </div>
 
         {/* Wallet & Membership */}
-        <div className="bg-[#f5ebe5] border border-[#c6c6b6] rounded-lg p-8 mb-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-[#f5ebe5] border border-[#c6c6b6] rounded-lg p-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div>
             <label className="block text-[#565a49] text-sm uppercase tracking-wider mb-2">Wallet Address</label>
             {userInfo.walletAddress ? (
@@ -234,22 +234,6 @@ const Profile = () => {
               <Calendar className="text-[#a66a42]" size={16} />
               <p className="text-[#2b2d25] text-lg">{userInfo.joinDate}</p>
             </div>
-          </div>
-        </div>
-
-        {/* Account Actions */}
-        <div className="bg-[#f5ebe5] border border-[#c6c6b6] rounded-lg p-6">
-          <h3 className="text-[#6b705c] text-lg font-semibold mb-4">Account Actions</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <button className="px-4 py-3 border border-[#c6c6b6] rounded-lg text-[#565a49] hover:text-[#2b2d25] hover:border-[#a5a58d] transition-all">
-              Export Account Data
-            </button>
-            <button className="px-4 py-3 border border-[#c6c6b6] rounded-lg text-[#565a49] hover:text-[#2b2d25] hover:border-[#a5a58d] transition-all">
-              Privacy Settings
-            </button>
-            <button className="px-4 py-3 border border-red-600 rounded-lg text-red-600 hover:text-red-700 hover:border-red-700 transition-all">
-              Delete Account
-            </button>
           </div>
         </div>
       </div>
