@@ -22,20 +22,18 @@ const WelcomeStep1 = () => {
   const [errors, setErrors] = useState({});
   const [connectingWallet, setConnectingWallet] = useState(false);
 
+  // Prefill data from localStorage instead of redirecting
   useEffect(() => {
-    const walletAddress = localStorage.getItem('walletAddress');
-    const profileExists =
-      localStorage.getItem('email') &&
-      localStorage.getItem('username') &&
-      localStorage.getItem('firstName') &&
-      localStorage.getItem('lastName') &&
-      localStorage.getItem('city') &&
-      localStorage.getItem('country');
-
-    if (walletAddress && profileExists) {
-      navigate('/welcomestep2');
-    }
-  }, [navigate]);
+    const savedData = {
+      email: localStorage.getItem('email') || '',
+      username: localStorage.getItem('username') || '',
+      firstName: localStorage.getItem('firstName') || '',
+      lastName: localStorage.getItem('lastName') || '',
+      city: localStorage.getItem('city') || '',
+      country: localStorage.getItem('country') || ''
+    };
+    setFormData(savedData);
+  }, []);
 
   const validateForm = () => {
     const newErrors = {};
@@ -107,7 +105,6 @@ const WelcomeStep1 = () => {
     try {
       const res = await walletLogin(walletAddress);
       if (!res?.isNewUser) {
-        // If user already exists, skip profile setup
         localStorage.setItem('walletAddress', walletAddress);
         localStorage.setItem('onboardingComplete', 'true');
         navigate('/welcomestep2');
@@ -132,7 +129,7 @@ const WelcomeStep1 = () => {
           localStorage.setItem(key, formData[key])
         );
         localStorage.setItem('walletAddress', walletAddress);
-        navigate('/welcome-step2');
+        navigate('/welcomestep2');
       } else {
         alert('Failed to update profile. Please try again.');
       }
@@ -145,187 +142,168 @@ const WelcomeStep1 = () => {
   };
 
   const inputClassName = (fieldName) => `
-    w-full px-4 py-3 bg-[#1a1a1a] border rounded-lg text-white placeholder-gray-500 
+    w-full px-4 py-3 bg-[#f5ebe5] border rounded-lg text-[#2b2d25] placeholder-[#75755c]
     focus:outline-none focus:ring-1 transition-all
     ${errors[fieldName]
       ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-      : 'border-gray-700 focus:border-white focus:ring-white'
+      : 'border-[#c6c6b6] focus:border-[#cb997e] focus:ring-[#cb997e]'
     }
   `;
 
   return (
-    <div className="min-h-screen bg-[#0d0d0d] relative overflow-hidden">
+    <div className="min-h-screen bg-[#2b2d25] flex items-center justify-center px-4 py-12">
       <Navigation />
+      <div className="w-full max-w-lg bg-[#f8f2ed] p-8 rounded-xl shadow-2xl">
+        <div className="flex flex-col items-center text-center">
+          <Logo />
 
-      <div className="absolute bottom-0 left-0 opacity-20">
-        <div className="grid grid-cols-8 gap-2 p-8">
-          {[...Array(64)].map((_, i) => (
-            <div key={i} className="w-1 h-1 bg-white rounded-full"></div>
-          ))}
-        </div>
-      </div>
+          <h1 className="text-[#6b705c] text-4xl font-bold mb-4 leading-tight">
+            Join Crypto Connect
+          </h1>
 
-      <div className="flex items-center justify-center min-h-screen px-4 py-20">
-        <div className="w-full max-w-lg">
-          <div className="flex flex-col items-center text-center">
-            <Logo />
+          <p className="text-[#cb997e] text-sm uppercase tracking-wider mb-2">
+            Step 1 of 2
+          </p>
 
-            <h1 className="text-white text-4xl font-bold mb-4 leading-tight">
-              Join Crypto Connect
-            </h1>
+          <p className="text-[#5f3a26] text-sm mb-8">
+            Tell us about yourself to get started
+          </p>
 
-            <p className="text-gray-400 text-sm uppercase tracking-wider mb-2">
-              Step 1 of 2
-            </p>
+          <div className="w-full space-y-6">
+            {/* Personal Info */}
+            <div className="text-left">
+              <div className="flex items-center space-x-2 mb-4">
+                <User className="text-[#a66a42]" size={20} />
+                <h3 className="text-[#6b705c] text-lg font-semibold">Personal Information</h3>
+              </div>
 
-            <p className="text-gray-400 text-sm mb-8">
-              Tell us about yourself to get started
-            </p>
-
-            <div className="w-full space-y-6">
-              {/* Personal Info */}
-              <div className="text-left">
-                <div className="flex items-center space-x-2 mb-4">
-                  <User className="text-gray-400" size={20} />
-                  <h3 className="text-white text-lg font-semibold">Personal Information</h3>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-gray-400 text-sm font-medium mb-2 uppercase tracking-wider">
-                      First Name *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.firstName}
-                      onChange={(e) => handleInputChange('firstName', e.target.value)}
-                      placeholder="John"
-                      className={inputClassName('firstName')}
-                    />
-                    {errors.firstName && (
-                      <p className="mt-1 text-red-400 text-sm">{errors.firstName}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-gray-400 text-sm font-medium mb-2 uppercase tracking-wider">
-                      Last Name *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.lastName}
-                      onChange={(e) => handleInputChange('lastName', e.target.value)}
-                      placeholder="Doe"
-                      className={inputClassName('lastName')}
-                    />
-                    {errors.lastName && (
-                      <p className="mt-1 text-red-400 text-sm">{errors.lastName}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <label className="block text-gray-400 text-sm font-medium mb-2 uppercase tracking-wider">
-                    Username *
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-[#565a49] text-sm font-medium mb-2 uppercase tracking-wider">
+                    First Name *
                   </label>
                   <input
                     type="text"
-                    value={formData.username}
-                    onChange={(e) => handleInputChange('username', e.target.value)}
-                    placeholder="johndoe123"
-                    className={inputClassName('username')}
+                    value={formData.firstName}
+                    onChange={(e) => handleInputChange('firstName', e.target.value)}
+                    placeholder="John"
+                    className={inputClassName('firstName')}
                   />
-                  {errors.username && (
-                    <p className="mt-1 text-red-400 text-sm">{errors.username}</p>
+                  {errors.firstName && (
+                    <p className="mt-1 text-red-600 text-sm">{errors.firstName}</p>
                   )}
-                  <p className="mt-1 text-gray-500 text-xs">Only letters, numbers, and underscores allowed</p>
-                </div>
-              </div>
-
-              {/* Contact Info */}
-              <div className="text-left">
-                <div className="flex items-center space-x-2 mb-4">
-                  <Mail className="text-gray-400" size={20} />
-                  <h3 className="text-white text-lg font-semibold">Contact Information</h3>
                 </div>
 
-                <div className="mb-4">
-                  <label className="block text-gray-400 text-sm font-medium mb-2 uppercase tracking-wider">
-                    Email Address *
+                <div>
+                  <label className="block text-[#565a49] text-sm font-medium mb-2 uppercase tracking-wider">
+                    Last Name *
                   </label>
                   <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                    placeholder="john.doe@example.com"
-                    className={inputClassName('email')}
+                    type="text"
+                    value={formData.lastName}
+                    onChange={(e) => handleInputChange('lastName', e.target.value)}
+                    placeholder="Doe"
+                    className={inputClassName('lastName')}
                   />
-                  {errors.email && (
-                    <p className="mt-1 text-red-400 text-sm">{errors.email}</p>
+                  {errors.lastName && (
+                    <p className="mt-1 text-red-600 text-sm">{errors.lastName}</p>
                   )}
                 </div>
               </div>
 
-              {/* Location Info */}
-              <div className="text-left">
-                <div className="flex items-center space-x-2 mb-4">
-                  <MapPin className="text-gray-400" size={20} />
-                  <h3 className="text-white text-lg font-semibold">Location</h3>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-gray-400 text-sm font-medium mb-2 uppercase tracking-wider">
-                      City *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.city}
-                      onChange={(e) => handleInputChange('city', e.target.value)}
-                      placeholder="New York"
-                      className={inputClassName('city')}
-                    />
-                    {errors.city && (
-                      <p className="mt-1 text-red-400 text-sm">{errors.city}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-gray-400 text-sm font-medium mb-2 uppercase tracking-wider">
-                      Country *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.country}
-                      onChange={(e) => handleInputChange('country', e.target.value)}
-                      placeholder="United States"
-                      className={inputClassName('country')}
-                    />
-                    {errors.country && (
-                      <p className="mt-1 text-red-400 text-sm">{errors.country}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Button */}
-              <button
-                onClick={handleNext}
-                disabled={connectingWallet}
-                className="w-full py-3 px-6 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center space-x-2 mt-8"
-              >
-                <span>{connectingWallet ? 'Connecting Wallet...' : 'Continue to Wallet Setup'}</span>
-                <ArrowRight size={16} />
-              </button>
-            </div>
-
-            <div className="mt-8 text-center">
-              <div className="flex items-center justify-center space-x-2 text-gray-500 text-sm">
-                <button className="hover:text-white transition-colors">Already have an account?</button>
-                <span>•</span>
-                <button className="hover:text-white transition-colors">Need help?</button>
+              <div className="mb-4">
+                <label className="block text-[#565a49] text-sm font-medium mb-2 uppercase tracking-wider">
+                  Username *
+                </label>
+                <input
+                  type="text"
+                  value={formData.username}
+                  onChange={(e) => handleInputChange('username', e.target.value)}
+                  placeholder="johndoe123"
+                  className={inputClassName('username')}
+                />
+                {errors.username && (
+                  <p className="mt-1 text-red-600 text-sm">{errors.username}</p>
+                )}
+                <p className="mt-1 text-[#75755c] text-xs">Only letters, numbers, and underscores allowed</p>
               </div>
             </div>
+
+            {/* Contact Info */}
+            <div className="text-left">
+              <div className="flex items-center space-x-2 mb-4">
+                <Mail className="text-[#a66a42]" size={20} />
+                <h3 className="text-[#6b705c] text-lg font-semibold">Contact Information</h3>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-[#565a49] text-sm font-medium mb-2 uppercase tracking-wider">
+                  Email Address *
+                </label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  placeholder="john.doe@example.com"
+                  className={inputClassName('email')}
+                />
+                {errors.email && (
+                  <p className="mt-1 text-red-600 text-sm">{errors.email}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Location Info */}
+            <div className="text-left">
+              <div className="flex items-center space-x-2 mb-4">
+                <MapPin className="text-[#a66a42]" size={20} />
+                <h3 className="text-[#6b705c] text-lg font-semibold">Location</h3>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[#565a49] text-sm font-medium mb-2 uppercase tracking-wider">
+                    City *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.city}
+                    onChange={(e) => handleInputChange('city', e.target.value)}
+                    placeholder="New York"
+                    className={inputClassName('city')}
+                  />
+                  {errors.city && (
+                    <p className="mt-1 text-red-600 text-sm">{errors.city}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-[#565a49] text-sm font-medium mb-2 uppercase tracking-wider">
+                    Country *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.country}
+                    onChange={(e) => handleInputChange('country', e.target.value)}
+                    placeholder="United States"
+                    className={inputClassName('country')}
+                  />
+                  {errors.country && (
+                    <p className="mt-1 text-red-600 text-sm">{errors.country}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Button */}
+            <button
+              onClick={handleNext}
+              disabled={connectingWallet}
+              className="w-full py-3 px-6 bg-[#cb997e] text-[#2b2d25] font-semibold rounded-lg hover:bg-[#b97550] transition-colors flex items-center justify-center space-x-2 mt-8"
+            >
+              <span>{connectingWallet ? 'Connecting Wallet...' : 'Continue to Wallet Setup'}</span>
+              <ArrowRight size={16} />
+            </button>
           </div>
         </div>
       </div>

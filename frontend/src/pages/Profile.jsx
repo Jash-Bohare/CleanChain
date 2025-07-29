@@ -19,7 +19,6 @@ const Profile = () => {
   const [editForm, setEditForm] = useState({ ...userInfo });
   const [errors, setErrors] = useState({});
 
-  // Load user data from localStorage on mount
   useEffect(() => {
     const getStored = (key) => localStorage.getItem(key) || '';
     const storedData = {
@@ -44,7 +43,6 @@ const Profile = () => {
     });
   }, []);
 
-  // Validate fields before saving
   const validateForm = () => {
     const newErrors = {};
 
@@ -71,7 +69,6 @@ const Profile = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Input change handler
   const handleInputChange = (field, value) => {
     setEditForm(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
@@ -79,7 +76,6 @@ const Profile = () => {
     }
   };
 
-  // Save profile
   const handleSave = () => {
     if (!validateForm()) return;
 
@@ -92,7 +88,6 @@ const Profile = () => {
     alert('Profile updated successfully!');
   };
 
-  // Cancel edit
   const handleCancel = () => {
     setEditForm({
       email: userInfo.email,
@@ -106,7 +101,6 @@ const Profile = () => {
     setErrors({});
   };
 
-  // Disconnect wallet
   const handleDisconnectWallet = () => {
     localStorage.removeItem('walletAddress');
     setUserInfo(prev => ({ ...prev, walletAddress: '' }));
@@ -114,39 +108,41 @@ const Profile = () => {
   };
 
   const inputClassName = (field) => `
-    w-full px-4 py-2 bg-[#0d0d0d] border rounded-lg text-white placeholder-gray-500 
+    w-full px-4 py-3 bg-[#f5ebe5] border rounded-lg text-[#2b2d25] placeholder-[#75755c]
     focus:outline-none focus:ring-1 transition-all
-    ${errors[field] ? 'border-red-500 focus:ring-red-500' : 'border-gray-700 focus:ring-white'}
+    ${errors[field]
+      ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+      : 'border-[#c6c6b6] focus:border-[#cb997e] focus:ring-[#cb997e]'
+    }
   `;
 
   return (
-    <div className="min-h-screen bg-[#0d0d0d] relative">
+    <div className="min-h-screen bg-[#2b2d25] relative py-12 px-6 flex justify-center">
       <Navigation />
-
-      <div className="pt-20 px-6 max-w-3xl mx-auto">
+      <div className="w-full max-w-4xl bg-[#f8f2ed] p-8 rounded-xl shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
             <Logo />
             <div>
-              <h1 className="text-white text-3xl font-bold">Profile</h1>
-              <p className="text-gray-400 text-sm">Manage your account information</p>
+              <h1 className="text-[#6b705c] text-3xl font-bold">Profile</h1>
+              <p className="text-[#cb997e] text-sm">Manage your account information</p>
             </div>
           </div>
 
           {isEditing ? (
             <div className="flex space-x-2">
-              <button onClick={handleSave} className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+              <button onClick={handleSave} className="flex items-center space-x-2 px-4 py-2 bg-[#cb997e] text-[#2b2d25] rounded-lg hover:bg-[#b97550]">
                 <Save size={16} />
                 <span>Save</span>
               </button>
-              <button onClick={handleCancel} className="flex items-center space-x-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+              <button onClick={handleCancel} className="flex items-center space-x-2 px-4 py-2 bg-[#c6c6b6] text-[#2b2d25] rounded-lg hover:bg-[#a5a58d]">
                 <X size={16} />
                 <span>Cancel</span>
               </button>
             </div>
           ) : (
-            <button onClick={() => setIsEditing(true)} className="flex items-center space-x-2 px-4 py-2 bg-white text-black rounded-lg hover:bg-gray-100">
+            <button onClick={() => setIsEditing(true)} className="flex items-center space-x-2 px-4 py-2 bg-[#cb997e] text-[#2b2d25] rounded-lg hover:bg-[#b97550]">
               <Edit3 size={16} />
               <span>Edit Profile</span>
             </button>
@@ -154,17 +150,17 @@ const Profile = () => {
         </div>
 
         {/* Profile Info Section */}
-        <div className="bg-[#1a1a1a] border border-gray-700 rounded-lg p-8 mb-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-[#f5ebe5] border border-[#c6c6b6] rounded-lg p-8 mb-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Personal Info */}
           <div className="space-y-6">
-            <h3 className="flex items-center space-x-2 text-white text-lg font-semibold">
-              <User className="text-gray-400" size={20} />
+            <h3 className="flex items-center space-x-2 text-[#6b705c] text-lg font-semibold">
+              <User className="text-[#a66a42]" size={20} />
               <span>Personal Information</span>
             </h3>
 
             {['firstName', 'lastName', 'username'].map(field => (
               <div key={field}>
-                <label className="block text-gray-400 text-sm uppercase tracking-wider mb-2">{field.replace(/([A-Z])/g, ' $1')}</label>
+                <label className="block text-[#565a49] text-sm uppercase tracking-wider mb-2">{field.replace(/([A-Z])/g, ' $1')}</label>
                 {isEditing ? (
                   <>
                     <input
@@ -174,10 +170,10 @@ const Profile = () => {
                       onChange={(e) => handleInputChange(field, e.target.value)}
                       className={inputClassName(field)}
                     />
-                    {errors[field] && <p className="text-sm text-red-400 mt-1">{errors[field]}</p>}
+                    {errors[field] && <p className="text-sm text-red-600 mt-1">{errors[field]}</p>}
                   </>
                 ) : (
-                  <p className="text-white text-lg">
+                  <p className="text-[#2b2d25] text-lg">
                     {field === 'username' ? `@${userInfo[field]}` : userInfo[field] || 'Not provided'}
                   </p>
                 )}
@@ -187,14 +183,14 @@ const Profile = () => {
 
           {/* Contact & Location */}
           <div className="space-y-6">
-            <h3 className="flex items-center space-x-2 text-white text-lg font-semibold">
-              <Mail className="text-gray-400" size={20} />
+            <h3 className="flex items-center space-x-2 text-[#6b705c] text-lg font-semibold">
+              <Mail className="text-[#a66a42]" size={20} />
               <span>Contact & Location</span>
             </h3>
 
             {['email', 'city', 'country'].map(field => (
               <div key={field}>
-                <label className="block text-gray-400 text-sm uppercase tracking-wider mb-2">{field}</label>
+                <label className="block text-[#565a49] text-sm uppercase tracking-wider mb-2">{field}</label>
                 {isEditing ? (
                   <>
                     <input
@@ -204,10 +200,10 @@ const Profile = () => {
                       onChange={(e) => handleInputChange(field, e.target.value)}
                       className={inputClassName(field)}
                     />
-                    {errors[field] && <p className="text-sm text-red-400 mt-1">{errors[field]}</p>}
+                    {errors[field] && <p className="text-sm text-red-600 mt-1">{errors[field]}</p>}
                   </>
                 ) : (
-                  <p className="text-white text-lg">{userInfo[field] || 'Not provided'}</p>
+                  <p className="text-[#2b2d25] text-lg">{userInfo[field] || 'Not provided'}</p>
                 )}
               </div>
             ))}
@@ -215,12 +211,12 @@ const Profile = () => {
         </div>
 
         {/* Wallet & Membership */}
-        <div className="bg-[#1a1a1a] border border-gray-700 rounded-lg p-8 mb-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-[#f5ebe5] border border-[#c6c6b6] rounded-lg p-8 mb-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div>
-            <label className="block text-gray-400 text-sm uppercase tracking-wider mb-2">Wallet Address</label>
+            <label className="block text-[#565a49] text-sm uppercase tracking-wider mb-2">Wallet Address</label>
             {userInfo.walletAddress ? (
               <div className="flex items-center justify-between">
-                <p className="text-white font-mono text-lg">
+                <p className="text-[#2b2d25] font-mono text-lg">
                   {userInfo.walletAddress.slice(0, 6)}...{userInfo.walletAddress.slice(-4)}
                 </p>
                 <button onClick={handleDisconnectWallet} className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700">
@@ -228,30 +224,30 @@ const Profile = () => {
                 </button>
               </div>
             ) : (
-              <p className="text-gray-400">No wallet connected</p>
+              <p className="text-[#75755c]">No wallet connected</p>
             )}
           </div>
 
           <div>
-            <label className="block text-gray-400 text-sm uppercase tracking-wider mb-2">Member Since</label>
+            <label className="block text-[#565a49] text-sm uppercase tracking-wider mb-2">Member Since</label>
             <div className="flex items-center space-x-2">
-              <Calendar className="text-gray-400" size={16} />
-              <p className="text-white text-lg">{userInfo.joinDate}</p>
+              <Calendar className="text-[#a66a42]" size={16} />
+              <p className="text-[#2b2d25] text-lg">{userInfo.joinDate}</p>
             </div>
           </div>
         </div>
 
         {/* Account Actions */}
-        <div className="bg-[#1a1a1a] border border-gray-700 rounded-lg p-6">
-          <h3 className="text-white text-lg font-semibold mb-4">Account Actions</h3>
+        <div className="bg-[#f5ebe5] border border-[#c6c6b6] rounded-lg p-6">
+          <h3 className="text-[#6b705c] text-lg font-semibold mb-4">Account Actions</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <button className="px-4 py-3 border border-gray-700 rounded-lg text-gray-300 hover:text-white hover:border-gray-600 transition-all">
+            <button className="px-4 py-3 border border-[#c6c6b6] rounded-lg text-[#565a49] hover:text-[#2b2d25] hover:border-[#a5a58d] transition-all">
               Export Account Data
             </button>
-            <button className="px-4 py-3 border border-gray-700 rounded-lg text-gray-300 hover:text-white hover:border-gray-600 transition-all">
+            <button className="px-4 py-3 border border-[#c6c6b6] rounded-lg text-[#565a49] hover:text-[#2b2d25] hover:border-[#a5a58d] transition-all">
               Privacy Settings
             </button>
-            <button className="px-4 py-3 border border-red-700 rounded-lg text-red-400 hover:text-red-300 hover:border-red-600 transition-all">
+            <button className="px-4 py-3 border border-red-600 rounded-lg text-red-600 hover:text-red-700 hover:border-red-700 transition-all">
               Delete Account
             </button>
           </div>
