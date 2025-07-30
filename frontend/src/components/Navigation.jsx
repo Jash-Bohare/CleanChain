@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Menu, X, MapPin, User, BarChart3, Image, LogOut } from 'lucide-react';
 
 const Navigation = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -14,66 +15,104 @@ const Navigation = () => {
     setIsMenuOpen(false);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('walletAddress');
+    localStorage.removeItem('onboardingComplete');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('username');
+    navigate('/');
+  };
+
   const navItems = [
-    { name: 'Map', path: '/map', action: () => navigate('/map') },
-    { name: 'Profile', path: '/profile', action: () => navigate('/profile') },
-    { name: 'Dashboard', path: '/dashboard', action: () => navigate('/dashboard') },
-    { name: 'Gallery', path: '/Gallery', action: () => navigate('/Gallery') }
+    { name: 'Logout', path: '/logout', icon: LogOut, action: handleLogout },
+    { name: 'Map', path: '/map', icon: MapPin, action: () => navigate('/map') },
+    { name: 'Dashboard', path: '/dashboard', icon: BarChart3, action: () => navigate('/dashboard') },
+    { name: 'Gallery', path: '/Gallery', icon: Image, action: () => navigate('/Gallery') },
+    { name: 'Profile', path: '/profile', icon: User, action: () => navigate('/profile') }
   ];
 
+  const isActive = (path) => {
+    if (path === '/' && location.pathname === '/') return true;
+    if (path !== '/' && location.pathname.startsWith(path)) return true;
+    return false;
+  };
+
   return (
-    <nav className="absolute top-0 left-0 right-0 z-10 p-4 sm:p-6">
-      <div className="flex justify-between items-center">
-        {/* Logo */}
-        <div className="flex items-center space-x-2 sm:space-x-3">
-          <div className="w-6 h-6 sm:w-8 sm:h-8 bg-white rounded-sm flex items-center justify-center">
-            <span className="text-black font-bold text-xs sm:text-sm">CC</span>
+    <nav className="fixed top-0 left-0 right-0 z-50 p-4 sm:p-6">
+      <div className="bg-[#1a1a1a]/80 backdrop-blur-md border border-gray-700/50 rounded-2xl shadow-2xl">
+        <div className="flex justify-between items-center p-4">
+          {/* Logo */}
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-sm">CC</span>
+            </div>
+            <div>
+              <span className="text-white font-bold text-lg">CleanChain</span>
+              <p className="text-gray-400 text-xs">Eco Rewards Platform</p>
+            </div>
           </div>
-          <span className="text-white font-medium text-sm sm:text-lg">Crypto Connect</span>
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-2">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const active = isActive(item.path);
+              return (
+                <button
+                  key={item.name}
+                  onClick={item.action}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 text-sm font-medium ${
+                    active
+                      ? 'bg-gradient-to-r from-green-400/20 to-emerald-500/20 text-green-400 border border-green-400/30'
+                      : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
+                  }`}
+                >
+                  <Icon size={16} />
+                  <span>{item.name}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={toggleMenu}
+            className="md:hidden text-white p-2 hover:bg-gray-800/50 rounded-lg transition-colors"
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
-          {navItems.map((item) => (
-            <button
-              key={item.name}
-              onClick={item.action}
-              className="text-gray-400 hover:text-white transition-colors text-sm lg:text-base"
-            >
-              {item.name}
-            </button>
-          ))}
-        </div>
-
-        {/* Mobile Menu Button */}
-        <button
-          onClick={toggleMenu}
-          className="md:hidden text-white p-2"
-          aria-label="Toggle menu"
-        >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="md:hidden border-t border-gray-700/50 bg-[#1a1a1a]/95 backdrop-blur-md">
+            <div className="flex flex-col space-y-1 p-4">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const active = isActive(item.path);
+                return (
+                  <button
+                    key={item.name}
+                    onClick={() => {
+                      item.action();
+                      closeMenu();
+                    }}
+                    className={`flex items-center space-x-3 text-left py-3 px-4 rounded-xl transition-all duration-200 text-sm font-medium ${
+                      active
+                        ? 'bg-gradient-to-r from-green-400/20 to-emerald-500/20 text-green-400 border border-green-400/30'
+                        : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
+                    }`}
+                  >
+                    <Icon size={18} />
+                    <span>{item.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
-
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-[#1a1a1a] border-t border-gray-700 shadow-lg">
-          <div className="flex flex-col space-y-1 p-4">
-            {navItems.map((item) => (
-              <button
-                key={item.name}
-                onClick={() => {
-                  item.action();
-                  closeMenu();
-                }}
-                className="text-left text-gray-400 hover:text-white transition-colors py-3 px-4 rounded-lg hover:bg-gray-800 text-sm"
-              >
-                {item.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
     </nav>
   );
 };

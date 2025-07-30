@@ -80,56 +80,55 @@ const Welcome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-900 via-emerald-800 to-black flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-green-900 flex flex-col relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        {/* Animated gradient orbs */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-green-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl animate-pulse delay-500"></div>
-        <div className="absolute top-10 right-1/3 w-64 h-64 bg-purple-500/8 rounded-full blur-3xl animate-pulse delay-1500"></div>
-        <div className="absolute bottom-10 left-1/3 w-56 h-56 bg-cyan-500/6 rounded-full blur-3xl animate-pulse delay-2000"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-green-500/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-blue-500/3 rounded-full blur-3xl animate-pulse delay-500"></div>
+        <div className="absolute top-10 right-1/3 w-64 h-64 bg-purple-500/4 rounded-full blur-3xl animate-pulse delay-1500"></div>
+        <div className="absolute bottom-10 left-1/3 w-56 h-56 bg-cyan-500/3 rounded-full blur-3xl animate-pulse delay-2000"></div>
         
         {/* Floating geometric shapes */}
-        <div className="absolute top-32 right-32 w-8 h-8 bg-green-400/20 rounded-full animate-bounce delay-300"></div>
-        <div className="absolute bottom-32 left-32 w-6 h-6 bg-emerald-400/20 rounded-full animate-bounce delay-700"></div>
-        <div className="absolute top-1/3 left-1/4 w-4 h-4 bg-blue-400/20 rounded-full animate-bounce delay-1000"></div>
-        <div className="absolute bottom-1/3 right-1/4 w-5 h-5 bg-yellow-400/20 rounded-full animate-bounce delay-500"></div>
-        <div className="absolute top-1/4 right-1/4 w-3 h-3 bg-purple-400/20 rounded-full animate-bounce delay-1200"></div>
-        <div className="absolute bottom-1/4 left-1/3 w-7 h-7 bg-cyan-400/20 rounded-full animate-bounce delay-800"></div>
-        <div className="absolute top-2/3 right-1/6 w-4 h-4 bg-pink-400/20 rounded-full animate-bounce delay-1500"></div>
-        <div className="absolute bottom-2/3 left-1/6 w-5 h-5 bg-orange-400/20 rounded-full animate-bounce delay-600"></div>
+        <div className="absolute top-32 right-32 w-8 h-8 bg-green-400/10 rounded-full animate-bounce delay-300"></div>
+        <div className="absolute bottom-32 left-32 w-6 h-6 bg-emerald-400/10 rounded-full animate-bounce delay-700"></div>
+        <div className="absolute top-1/3 left-1/4 w-4 h-4 bg-blue-400/10 rounded-full animate-bounce delay-1000"></div>
+        <div className="absolute bottom-1/3 right-1/4 w-5 h-5 bg-yellow-400/10 rounded-full animate-bounce delay-500"></div>
+        <div className="absolute top-1/4 right-1/4 w-3 h-3 bg-purple-400/10 rounded-full animate-bounce delay-1200"></div>
+        <div className="absolute bottom-1/4 left-1/3 w-7 h-7 bg-cyan-400/10 rounded-full animate-bounce delay-800"></div>
+        <div className="absolute top-2/3 right-1/6 w-4 h-4 bg-pink-400/10 rounded-full animate-bounce delay-1500"></div>
+        <div className="absolute bottom-2/3 left-1/6 w-5 h-5 bg-orange-400/10 rounded-full animate-bounce delay-600"></div>
         
         {/* Animated lines */}
-        <div className="absolute top-1/4 left-0 w-32 h-px bg-gradient-to-r from-transparent via-green-400/30 to-transparent animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-0 w-32 h-px bg-gradient-to-l from-transparent via-emerald-400/30 to-transparent animate-pulse delay-1000"></div>
-        <div className="absolute top-0 left-1/3 w-px h-32 bg-gradient-to-b from-transparent via-blue-400/30 to-transparent animate-pulse delay-500"></div>
-        <div className="absolute bottom-0 right-1/3 w-px h-32 bg-gradient-to-t from-transparent via-purple-400/30 to-transparent animate-pulse delay-1500"></div>
+        <div className="absolute top-1/4 left-0 w-32 h-px bg-gradient-to-r from-transparent via-green-400/20 to-transparent animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-0 w-32 h-px bg-gradient-to-l from-transparent via-emerald-400/20 to-transparent animate-pulse delay-1000"></div>
+        <div className="absolute top-0 left-1/3 w-px h-32 bg-gradient-to-b from-transparent via-blue-400/20 to-transparent animate-pulse delay-500"></div>
+        <div className="absolute bottom-0 right-1/3 w-px h-32 bg-gradient-to-t from-transparent via-purple-400/20 to-transparent animate-pulse delay-1500"></div>
         
         {/* Rotating elements */}
-        <div className="absolute top-20 right-20 w-16 h-16 border border-green-400/20 rounded-full animate-spin duration-20s"></div>
-        <div className="absolute bottom-20 left-20 w-12 h-12 border border-emerald-400/20 rounded-full animate-spin duration-15s reverse"></div>
-        <div className="absolute top-1/2 right-10 w-8 h-8 border border-blue-400/20 rounded-full animate-spin duration-25s"></div>
+        <div className="absolute top-20 right-20 w-16 h-16 border border-green-400/10 rounded-full animate-spin duration-20s"></div>
+        <div className="absolute bottom-20 left-20 w-12 h-12 border border-emerald-400/10 rounded-full animate-spin duration-15s reverse"></div>
+        <div className="absolute top-1/2 right-10 w-8 h-8 border border-blue-400/10 rounded-full animate-spin duration-25s"></div>
         
         {/* Particle effects */}
-        <div className="absolute top-40 left-1/2 w-2 h-2 bg-white/10 rounded-full animate-ping delay-1000"></div>
-        <div className="absolute bottom-40 right-1/2 w-1 h-1 bg-green-400/20 rounded-full animate-ping delay-2000"></div>
-        <div className="absolute top-1/2 left-20 w-1.5 h-1.5 bg-emerald-400/20 rounded-full animate-ping delay-1500"></div>
-        <div className="absolute bottom-1/2 right-20 w-1 h-1 bg-blue-400/20 rounded-full animate-ping delay-3000"></div>
+        <div className="absolute top-40 left-1/2 w-2 h-2 bg-white/5 rounded-full animate-ping delay-1000"></div>
+        <div className="absolute bottom-40 right-1/2 w-1 h-1 bg-green-400/10 rounded-full animate-ping delay-2000"></div>
+        <div className="absolute top-1/2 left-20 w-1.5 h-1.5 bg-emerald-400/10 rounded-full animate-ping delay-1500"></div>
+        <div className="absolute bottom-1/2 right-20 w-1 h-1 bg-blue-400/10 rounded-full animate-ping delay-3000"></div>
         
         {/* Grid pattern overlay */}
-        <div className="absolute inset-0 opacity-30" style={{
+        <div className="absolute inset-0 opacity-20" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
         }}></div>
         
         {/* Subtle noise texture */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-pulse"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/3 to-transparent animate-pulse"></div>
         
         {/* Corner accents */}
-        <div className="absolute top-0 left-0 w-32 h-32 border-l-2 border-t-2 border-green-400/20"></div>
-        <div className="absolute top-0 right-0 w-32 h-32 border-r-2 border-t-2 border-emerald-400/20"></div>
-        <div className="absolute bottom-0 left-0 w-32 h-32 border-l-2 border-b-2 border-blue-400/20"></div>
-        <div className="absolute bottom-0 right-0 w-32 h-32 border-r-2 border-b-2 border-purple-400/20"></div>
+        <div className="absolute top-0 left-0 w-32 h-32 border-l-2 border-t-2 border-green-400/10"></div>
+        <div className="absolute top-0 right-0 w-32 h-32 border-r-2 border-t-2 border-emerald-400/10"></div>
+        <div className="absolute bottom-0 left-0 w-32 h-32 border-l-2 border-b-2 border-blue-400/10"></div>
+        <div className="absolute bottom-0 right-0 w-32 h-32 border-r-2 border-b-2 border-purple-400/10"></div>
       </div>
       
       {toast && (
@@ -170,13 +169,13 @@ const Welcome = () => {
           </div>
         )}
         {walletAddress && (
-          <p className="mb-8 md:mb-10 lg:mb-12 text-white text-base md:text-lg">
+          <p className="mb-8 md:mb-10 lg:mb-12 text-green-400 text-base md:text-lg">
             Wallet Connected: <strong>{walletAddress}</strong>
           </p>
         )}
         
         <div className="relative">
-          <h2 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6 text-center">How It Works??</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6 text-center">How It Works</h2>
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8 md:mb-10 lg:mb-12 w-full max-w-5xl">
