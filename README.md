@@ -56,7 +56,7 @@ CleanChain is a decentralized platform that incentivizes environmental cleanup t
 - **Sepolia Testnet** - Development network
 - **Solidity** - Smart contract language
 - **Hardhat** - Development environment
-- **Web3.js** - Ethereum JavaScript API
+- **Ethers.js** - Ethereum JavaScript API
 
 ### **APIs & Services**
 - **Google Maps API** - Interactive mapping
